@@ -29,7 +29,7 @@ import org.apache.commons.pool2.impl.*;
  */
 public class RabbitMQTests {
      // Number of threads to deploy in each test
-     private static final int NUM_THREADS = 100;
+     private static final int NUM_THREADS = 200;
      // Number of messages to publish in each thread
      private static final int NUM_ITERATIONS = 100;
      // Number of channels to add to pools
@@ -37,7 +37,9 @@ public class RabbitMQTests {
      // For Apache pool example, this allows the pool size to grow to ~= the same number of concurrent threads 
      // that utilize the pool. Pass to config.setMaxWait(..) method to allow this behaviour
      private static final int ON_DEMAND = -1;
-     // test queue name
+     // RMQ broker machine
+     private static final String SERVER = "localhost";
+     // test queue name    
      private static final String QUEUE_NAME = "test";
      // the durtaion in seconds a client waits for a channel to be available in the pool
      // Tune value to meet request load and pass to config.setMaxWait(...) method
@@ -46,7 +48,7 @@ public class RabbitMQTests {
      
      
      /**
-     * This method runs a multithreaded test using a channel pool based on the
+     * This method runs a multi-threaded test using a channel pool based on the
      * Apache GenericObjectPool class
      * 
      * @param conn A connection to a RabbitMQ broker
@@ -167,23 +169,41 @@ public class RabbitMQTests {
     
     }
     
+    private void showTestConfig() {
+         System.out.println("INFO: RabbitMQ Channel Pool Examples");
+         System.out.println("INFO: Test Configuration");
+         System.out.println("INFO: ==================");
+         System.out.println(" ");
+         System.out.println("INFO: Number of Threads per Test: " + NUM_THREADS);
+         System.out.println("INFO: Number of messges to publish per thread: " + NUM_ITERATIONS);
+         System.out.println("INFO: Channel Pool Size: " + NUM_CHANS);
+         System.out.println("INFO: Queue name: " + QUEUE_NAME);
+         System.out.println("INFO: RMQ Broker: " + SERVER);
+         System.out.println(" ");
+         System.out.println("INFO: ==============================");
+         System.out.println(" ");
+    }
+    
      /**
      * Run this method to execute two multi threaded tests using (1) an Apache GenericObjectPool based implementation
      * and (2)  a channel pool based on s simple BlockQueue based implementation
      *
      */
     public static void main(String[] args) throws IOException, TimeoutException {
+         // create object to run tests
+        RabbitMQTests test = new RabbitMQTests();     
+        test.showTestConfig();
+
         // connect to local for testing
         // TO DO refactor to use constants or config file
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(SERVER);
         factory.setUsername("guest");
         factory.setPassword("guest");
 
         final Connection RMQconn = factory.newConnection();
         System.out.println("INFO: RabbitMQ connection established");
-        // create object to run tests
-        RabbitMQTests test = new RabbitMQTests();
+
         
         // run ApachePoolTest and calculate the duration it takes
         long start = System.nanoTime();
